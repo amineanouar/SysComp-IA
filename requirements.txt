@@ -1,7 +1,6 @@
 notepad requirements.txt
-```
-Colle ceci et sauvegarde :
-```
+
+
 Pillow
 opencv-python
 scikit-image
