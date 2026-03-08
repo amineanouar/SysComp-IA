@@ -1,10 +1,5 @@
 notepad README.md
 
-```
-
-Colle ceci et sauvegarde :
-
-```
 
 \# Sys\_Compression\_Automatique
 
