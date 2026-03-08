@@ -1,0 +1,13 @@
+# Tu es déjà dans D:\Sys_Compression_Automatique ✅
+
+notepad .gitignore
+```
+Colle ceci et sauvegarde :
+```
+.env
+__pycache__/
+*.pyc
+.venv/
+dataset/
+results/
+.ipynb_checkpoints/
