@@ -45,5 +45,48 @@ L'étape finale de l'orchestration.
 
 1. **Cloner le répertoire :**
    ```bash
-   git clone https://github.com/amineanouar/Sys_Compression_Automatique.git
+   git clone https://github.com/ton-nom-utilisateur/Sys_Compression_Automatique.git
    cd Sys_Compression_Automatique
+   ```
+
+2. **Installer les dépendances :**
+   Assurez-vous d'avoir Python installé, puis exécutez :
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Variables d'Environnement :**
+   Copiez le fichier `.env.example` en `.env` (ou créez-le) et ajoutez-y vos clés API :
+   ```env
+   GROQ_API_KEY=votre_cle_groq
+   COHERE_API_KEY=votre_cle_cohere
+   MISTRAL_API_KEY=votre_cle_mistral
+   ```
+
+## 🚀 Démarrage de l'Application
+
+Le système fonctionne avec deux composants distincts fonctionnant en parallèle (Backend et Frontend).
+
+**Terminal 1 : Lancer le Backend (API Flask)**
+Ce serveur fait tourner l'intelligence artificielle et l'orchestration des agents.
+```bash
+python api.py
+```
+
+**Terminal 2 : Lancer le Frontend (Streamlit)**
+Lancez l'interface graphique interactive pour l'utilisateur.
+```bash
+streamlit run app.py
+```
+
+## 📁 Structure et Fichiers Principaux
+
+La séparation des fichiers garantit une architecture propre et modulaire (séparation Frontend / Backend) :
+
+- **`api.py` (Le Backend / Cerveau)** : C'est le serveur Flask. Il ne possède aucune interface graphique. Son seul but est de recevoir les requêtes web, de déclencher les 5 agents Python de manière séquentielle, et de renvoyer le rapport final en JSON. C'est l'API REST de l'application.
+- **`app_v1.py` (Ancienne Interface)** : C'est une version précédente (ou une variante simplifiée) du frontend Streamlit, probablement conservée pour des raisons de tests, de développement ou pour garder la trace d'une ancienne interface de validation.
+- **`agents/`** : Dossier contenant l'intelligence artificielle pure (modules Python de chaque agent).
+- **`dataset/` & `results/`** : Les répertoires de stockage des images originales en entrée et compressées en sortie, classées par dossier selon le type d'image.
+
+## 🎓 Contexte
+Projet réalisé dans le cadre de l'Université Hassan II - FST Mohammedia.
