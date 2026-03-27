@@ -91,17 +91,18 @@ La séparation des fichiers garantit une architecture propre et modulaire (sépa
 ### 📁Voici l'organisation de notre projet :
 
 Sys_Compression_Automatique/
+
 ├── agents/                  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Intelligence artificielle pure (Modules Python des 5 agents)
 
-│   ├── agent_analyseur.py   &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Extraction des caractéristiques visuelles et mathématiques
+│   &emsp;├── agent_analyseur.py   &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Extraction des caractéristiques visuelles et mathématiques
 
-│   ├── agent_classifier.py  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Prise de décision via les LLMs (Groq, Cohere, Mistral)
+│   &emsp;├── agent_classifier.py  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Prise de décision via les LLMs (Groq, Cohere, Mistral)
 
-│   ├── agent_compresseur.py &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Exécution de la compression selon le format et la qualité choisis
+│   &emsp;├── agent_compresseur.py &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Exécution de la compression selon le format et la qualité choisis
 
-│   ├── agent_evaluateur.py  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Calcul des métriques de qualité (PSNR, SSIM, MSE)
+│   &emsp;├── agent_evaluateur.py  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Calcul des métriques de qualité (PSNR, SSIM, MSE)
 
-│   └── agent_rapporteur.py  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Génération du rapport final au format JSON
+│   &emsp;└── agent_rapporteur.py  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Génération du rapport final au format JSON
 
 ├── dataset/                 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Répertoire des images originales en entrée
 
