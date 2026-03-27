@@ -1,11 +1,39 @@
-
-
-notepad .gitignore
-
 .env
-__pycache__/
-*.pyc
-.venv/
-dataset/
-results/
+.env.local
+
+
+# Dossiers d'images téléchargées ou générées par catégorie
+dataset/photos/
+dataset/documents/
+dataset/graphiques/
+dataset/screenshots/
+
+results/photos/
+results/documents/
+results/graphiques/
+results/screenshots/
+
+# Formats d'images traités par le projet
+*.jpeg
+*.png
+*.webp
+*.avif
+*.heif
+
+# Garder les images de présentation
+!logo_fst.jpg
+!banner.png
+!architecture*.svg
+
+# Fichiers et dossiers Jupyter Notebook/Anaconda
 .ipynb_checkpoints/
+anaconda_projects/
+
+# Fichiers système et IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Fichiers exécutables lourds
+ngrok.exe
