@@ -1,11 +1,17 @@
+
 import os
+from dotenv import load_dotenv
 import numpy as np
 from PIL import Image
 import cv2
 from scipy.stats import entropy
 from skimage.feature import graycomatrix, graycoprops
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+
+load_dotenv()
+tesseract_path = os.getenv("TESSERACT_CMD", "C:\\Program Files\\Tesseract-OCR\\tesseract.exe")
+pytesseract.pytesseract.tesseract_cmd = tesseract_path
+
 import json
 from datetime import datetime
 
@@ -22,7 +28,6 @@ class AgentAnalyseur:
         self.version = "2.0"
         print(f"Agent {self.nom} v{self.version} initialise et pret !")
 
-    # ------------------------------------------------------------------
     def analyser(self, chemin_image):
         print(f"Analyse de : {chemin_image}")
 
@@ -32,8 +37,16 @@ class AgentAnalyseur:
                 "message": f"Image non trouvee : {chemin_image}"
             }
 
-        image_pil = Image.open(chemin_image)
-        image_cv2 = cv2.imread(chemin_image)
+        try:
+            image_pil = Image.open(chemin_image)
+            image_cv2 = cv2.imread(chemin_image)
+            if image_cv2 is None:
+                raise ValueError("Impossible de lire l'image (fichier corrompu ou format non supporte par OpenCV).")
+        except Exception as e:
+            return {
+                "statut" : "erreur",
+                "message": str(e)
+            }
 
         metadonnees = self._extraire_metadonnees(chemin_image, image_pil)
         couleurs    = self._analyser_couleurs(image_pil)
@@ -56,7 +69,6 @@ class AgentAnalyseur:
         print(f"Analyse terminee pour : {chemin_image}")
         return rapport
 
-    # ------------------------------------------------------------------
     def _extraire_metadonnees(self, chemin_image, image_pil):
         taille_kb        = os.path.getsize(chemin_image) / 1024
         largeur, hauteur = image_pil.size
@@ -76,7 +88,6 @@ class AgentAnalyseur:
             "nb_pixels"   : largeur * hauteur,
         }
 
-    # ------------------------------------------------------------------
     def _analyser_couleurs(self, image_pil):
         pixels  = np.array(image_pil.convert("RGB"))
         canal_r = pixels[:, :, 0]
@@ -104,7 +115,6 @@ class AgentAnalyseur:
             "luminosite_globale": round(float(np.mean(pixels)), 2),
         }
 
-    # ------------------------------------------------------------------
     def _analyser_complexite(self, image_cv2):
         gris            = cv2.cvtColor(image_cv2, cv2.COLOR_BGR2GRAY)
         histogramme, _  = np.histogram(gris, bins=256, range=(0, 256), density=True)
@@ -131,7 +141,7 @@ class AgentAnalyseur:
         if score_global < 0.3:
             niveau = "faible"
         elif score_global < 0.6:
-            niveau = "modere"
+            niveau = "Modéré"
         else:
             niveau = "eleve"
 
@@ -143,7 +153,6 @@ class AgentAnalyseur:
             "niveau_complexite" : niveau,
         }
 
-    # ------------------------------------------------------------------
     def _analyser_textures_glcm(self, image_cv2):
         """
         Analyse les textures via la matrice de co-occurrence GLCM.
@@ -189,7 +198,6 @@ class AgentAnalyseur:
                 "statut"     : f"erreur : {str(e)}"
             }
 
-    # ------------------------------------------------------------------
     def _detecter_texte_ocr(self, image_pil):
         """
         Detecte la presence de texte dans l image via OCR (pytesseract).
@@ -248,7 +256,6 @@ class AgentAnalyseur:
                 "statut"           : f"erreur : {str(e)}"
             }
 
-    # ------------------------------------------------------------------
     def sauvegarder_rapport(self, rapport, chemin_sortie):
         os.makedirs(os.path.dirname(chemin_sortie), exist_ok=True)
         with open(chemin_sortie, "w", encoding="utf-8") as f:
