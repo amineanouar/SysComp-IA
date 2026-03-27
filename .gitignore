@@ -22,8 +22,7 @@ results/screenshots/
 
 # Garder les images de présentation
 !logo_fst.jpg
-!banner.png
-!architecture*.svg
+
 
 # Fichiers et dossiers Jupyter Notebook/Anaconda
 .ipynb_checkpoints/
