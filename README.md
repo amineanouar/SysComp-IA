@@ -101,13 +101,21 @@ Sys_Compression_Automatique/
 ├── .ipynb_checkpoints/      # Fichiers de sauvegarde Jupyter (Environnement de dev)
 
 ├── anaconda_projects/       # Configurations liées à Anaconda (Environnement de dev)
+
 ├── .env                     # Variables d'environnement (Clés API - NON PUBLIÉ SUR GIT)
+
 ├── .gitignore               # Fichiers et dossiers ignorés par Git (ex: .env, ngrok.exe)
+
 ├── api.py                   # Le Backend / Cerveau : Serveur Flask REST orchestrant les agents
+
 ├── app_v1.py                # Le Frontend : Interface utilisateur développée avec Streamlit
+
 ├── logo_fst.jpg             # Logo de l'Université Hassan II - FST Mohammedia
+
 ├── ngrok.exe                # Outil de tunneling pour exposer l'API localement sur le web
+
 ├── README.md                # Documentation principale du projet
+
 └── requirements.txt         # Liste des dépendances et bibliothèques Python nécessaires
 ## 🎓 Contexte
 Projet réalisé dans le cadre de l'Université Hassan II - FST Mohammedia.
