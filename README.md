@@ -88,5 +88,21 @@ La séparation des fichiers garantit une architecture propre et modulaire (sépa
 - **`agents/`** : Dossier contenant l'intelligence artificielle pure (modules Python de chaque agent).
 - **`dataset/` & `results/`** : Les répertoires de stockage des images originales en entrée et compressées en sortie, classées par dossier selon le type d'image.
 
+###📁Voici l'organisation de notre projet :
+
+Sys_Compression_Automatique/
+├── agents/                  # Intelligence artificielle pure (Modules Python des 5 agents)
+├── dataset/                 # Répertoire des images originales en entrée
+├── results/                 # Répertoire des images compressées en sortie et rapports JSON
+├── .ipynb_checkpoints/      # Fichiers de sauvegarde Jupyter (Environnement de dev)
+├── anaconda_projects/       # Configurations liées à Anaconda (Environnement de dev)
+├── .env                     # Variables d'environnement (Clés API - NON PUBLIÉ SUR GIT)
+├── .gitignore               # Fichiers et dossiers ignorés par Git (ex: .env, ngrok.exe)
+├── api.py                   # Le Backend / Cerveau : Serveur Flask REST orchestrant les agents
+├── app_v1.py                # Le Frontend : Interface utilisateur développée avec Streamlit
+├── logo_fst.jpg             # Logo de l'Université Hassan II - FST Mohammedia
+├── ngrok.exe                # Outil de tunneling pour exposer l'API localement sur le web
+├── README.md                # Documentation principale du projet
+└── requirements.txt         # Liste des dépendances et bibliothèques Python nécessaires
 ## 🎓 Contexte
 Projet réalisé dans le cadre de l'Université Hassan II - FST Mohammedia.
