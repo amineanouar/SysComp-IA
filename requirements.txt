@@ -1,7 +1,6 @@
-notepad requirements.txt
-
-
 Pillow
+pillow-avif-plugin
+pillow-heif
 opencv-python
 scikit-image
 numpy
