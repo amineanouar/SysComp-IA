@@ -127,5 +127,28 @@ Sys_Compression_Automatique/
 ├── README.md                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Documentation principale du projet
 
 └── requirements.txt         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Liste des dépendances et bibliothèques Python nécessaires
+
+
+```text
+Sys_Compression_Automatique/
+├── agents/                  # IA pure (Modules Python des 5 agents)
+│   ├── agent_analyseur.py   # Extraction des caractéristiques visuelles
+│   ├── agent_classifier.py  # Prise de décision (Groq, Cohere, Mistral)
+│   ├── agent_compresseur.py # Exécution de la compression
+│   ├── agent_evaluateur.py  # Calcul des métriques (PSNR, SSIM, MSE)
+│   └── agent_rapporteur.py  # Génération du rapport final JSON
+├── dataset/                 # Images originales en entrée
+├── results/                 # Images compressées et rapports JSON
+├── .ipynb_checkpoints/      # Sauvegarde Jupyter (Environnement dev)
+├── anaconda_projects/       # Configurations Anaconda
+├── .env                     # Variables d'environnement (Clés API)
+├── .gitignore               # Fichiers ignorés par Git (ex: .env)
+├── api.py                   # Backend : Serveur Flask REST
+├── app_v1.py                # Frontend : Interface Streamlit
+├── logo_fst.jpg             # Logo de la FST Mohammedia
+├── ngrok.exe                # Tunneling pour exposer l'API
+├── README.md                # Documentation du projet
+└── requirements.txt         # Dépendances et bibliothèques Python
+```
 ## 🎓 Contexte
 Projet réalisé dans le cadre de l'Université Hassan II - FST Mohammedia.
