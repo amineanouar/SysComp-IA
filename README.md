@@ -41,6 +41,24 @@ L'étape finale de l'orchestration.
 - **Modèles de Langage (LLM)** : Groq, Cohere, Mistral
 - **Visualisation** : Matplotlib
 
+| Métrique | Description | Valeur idéale |
+|---|---|---|
+| **PSNR** | Peak Signal-to-Noise Ratio | ∞ (identique), > 30 dB (acceptable) |
+| **SSIM** | Structural Similarity Index | 1.0 (identique), > 0.80 (acceptable) |
+| **MSE** | Mean Squared Error | 0 (identique) |
+| **Ratio** | Taux de compression | Maximiser |
+| **Score** | Qualité/Taille pondéré | Maximiser |
+
+
+
+| Format | Type | Usage recommandé |
+|---|---|---|
+| JPEG | Avec pertes | Photos, paysages |
+| PNG | Sans pertes | Documents, graphiques |
+| WebP | Hybride | Screenshots, web |
+| HEIF* | Avancé | Photos mobiles |
+| AVIF* | Avancé | Compression maximale |
+
 ## 📦 Installation et Prérequis
 
 1. **Cloner le répertoire :**
