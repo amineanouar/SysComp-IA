@@ -90,45 +90,6 @@ La séparation des fichiers garantit une architecture propre et modulaire (sépa
 
 ### 📁Voici l'organisation de notre projet :
 
-Sys_Compression_Automatique/
-
-├── agents/                  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Intelligence artificielle pure (Modules Python des 5 agents)
-
-│   &emsp;├── agent_analyseur.py   &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Extraction des caractéristiques visuelles et mathématiques
-
-│   &emsp;├── agent_classifier.py  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Prise de décision via les LLMs (Groq, Cohere, Mistral)
-
-│   &emsp;├── agent_compresseur.py &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Exécution de la compression selon le format et la qualité choisis
-
-│   &emsp;├── agent_evaluateur.py  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Calcul des métriques de qualité (PSNR, SSIM, MSE)
-
-│   &emsp;└── agent_rapporteur.py  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Génération du rapport final au format JSON
-
-├── dataset/                 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Répertoire des images originales en entrée
-
-├── results/                 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Répertoire des images compressées en sortie et rapports JSON
-
-├── .ipynb_checkpoints/      &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Fichiers de sauvegarde Jupyter (Environnement de dev)
-
-├── anaconda_projects/       &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Configurations liées à Anaconda (Environnement de dev)
-
-├── .env                     &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Variables d'environnement (Clés API - NON PUBLIÉ SUR GIT)
-
-├── .gitignore               &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Fichiers et dossiers ignorés par Git (ex: .env, ngrok.exe)
-
-├── api.py                   &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Le Backend / Cerveau : Serveur Flask REST orchestrant les agents
-
-├── app_v1.py                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Le Frontend : Interface utilisateur développée avec Streamlit
-
-├── logo_fst.jpg             &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Logo de l'Université Hassan II - FST Mohammedia
-
-├── ngrok.exe                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Outil de tunneling pour exposer l'API localement sur le web
-
-├── README.md                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Documentation principale du projet
-
-└── requirements.txt         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Liste des dépendances et bibliothèques Python nécessaires
-
-
 ```text
 Sys_Compression_Automatique/
 ├── agents/                  # IA pure (Modules Python des 5 agents)
