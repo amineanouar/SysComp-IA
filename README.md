@@ -92,30 +92,30 @@ La séparation des fichiers garantit une architecture propre et modulaire (sépa
 
 Sys_Compression_Automatique/
 
-├── agents/                  &emsp;&emsp;&emsp;&emsp;# Intelligence artificielle pure (Modules Python des 5 agents)
+├── agents/                  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Intelligence artificielle pure (Modules Python des 5 agents)
 
-├── dataset/                 &emsp;&emsp;&emsp;&emsp;# Répertoire des images originales en entrée
+├── dataset/                 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Répertoire des images originales en entrée
 
-├── results/                 &emsp;&emsp;&emsp;&emsp;# Répertoire des images compressées en sortie et rapports JSON
+├── results/                 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Répertoire des images compressées en sortie et rapports JSON
 
-├── .ipynb_checkpoints/      # Fichiers de sauvegarde Jupyter (Environnement de dev)
+├── .ipynb_checkpoints/      &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Fichiers de sauvegarde Jupyter (Environnement de dev)
 
-├── anaconda_projects/       # Configurations liées à Anaconda (Environnement de dev)
+├── anaconda_projects/       &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Configurations liées à Anaconda (Environnement de dev)
 
-├── .env                     # Variables d'environnement (Clés API - NON PUBLIÉ SUR GIT)
+├── .env                     &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Variables d'environnement (Clés API - NON PUBLIÉ SUR GIT)
 
-├── .gitignore               # Fichiers et dossiers ignorés par Git (ex: .env, ngrok.exe)
+├── .gitignore               &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Fichiers et dossiers ignorés par Git (ex: .env, ngrok.exe)
 
-├── api.py                   # Le Backend / Cerveau : Serveur Flask REST orchestrant les agents
+├── api.py                   &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Le Backend / Cerveau : Serveur Flask REST orchestrant les agents
 
-├── app_v1.py                # Le Frontend : Interface utilisateur développée avec Streamlit
+├── app_v1.py                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Le Frontend : Interface utilisateur développée avec Streamlit
 
-├── logo_fst.jpg             # Logo de l'Université Hassan II - FST Mohammedia
+├── logo_fst.jpg             &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Logo de l'Université Hassan II - FST Mohammedia
 
-├── ngrok.exe                # Outil de tunneling pour exposer l'API localement sur le web
+├── ngrok.exe                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Outil de tunneling pour exposer l'API localement sur le web
 
-├── README.md                # Documentation principale du projet
+├── README.md                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Documentation principale du projet
 
-└── requirements.txt         # Liste des dépendances et bibliothèques Python nécessaires
+└── requirements.txt         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# Liste des dépendances et bibliothèques Python nécessaires
 ## 🎓 Contexte
 Projet réalisé dans le cadre de l'Université Hassan II - FST Mohammedia.
