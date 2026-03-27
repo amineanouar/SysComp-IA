@@ -88,9 +88,10 @@ La séparation des fichiers garantit une architecture propre et modulaire (sépa
 - **`agents/`** : Dossier contenant l'intelligence artificielle pure (modules Python de chaque agent).
 - **`dataset/` & `results/`** : Les répertoires de stockage des images originales en entrée et compressées en sortie, classées par dossier selon le type d'image.
 
-###📁Voici l'organisation de notre projet :
+### 📁Voici l'organisation de notre projet :
 
 Sys_Compression_Automatique/
+
 ├── agents/                  # Intelligence artificielle pure (Modules Python des 5 agents)
 ├── dataset/                 # Répertoire des images originales en entrée
 ├── results/                 # Répertoire des images compressées en sortie et rapports JSON
