@@ -93,9 +93,13 @@ La séparation des fichiers garantit une architecture propre et modulaire (sépa
 Sys_Compression_Automatique/
 
 ├── agents/                  # Intelligence artificielle pure (Modules Python des 5 agents)
+
 ├── dataset/                 # Répertoire des images originales en entrée
+
 ├── results/                 # Répertoire des images compressées en sortie et rapports JSON
+
 ├── .ipynb_checkpoints/      # Fichiers de sauvegarde Jupyter (Environnement de dev)
+
 ├── anaconda_projects/       # Configurations liées à Anaconda (Environnement de dev)
 ├── .env                     # Variables d'environnement (Clés API - NON PUBLIÉ SUR GIT)
 ├── .gitignore               # Fichiers et dossiers ignorés par Git (ex: .env, ngrok.exe)
