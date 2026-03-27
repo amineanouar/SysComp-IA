@@ -2,7 +2,7 @@
 .env.local
 
 
-# Dossiers d'images téléchargées ou générées par catégorie
+# Dossiers d'images générées par catégorie
 dataset/photos/
 dataset/documents/
 dataset/graphiques/
