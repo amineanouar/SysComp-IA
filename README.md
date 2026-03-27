@@ -41,6 +41,8 @@ L'étape finale de l'orchestration.
 - **Modèles de Langage (LLM)** : Groq, Cohere, Mistral
 - **Visualisation** : Matplotlib
 
+## 📊 Métriques Implémentées
+
 | Métrique | Description | Valeur idéale |
 |---|---|---|
 | **PSNR** | Peak Signal-to-Noise Ratio | ∞ (identique), > 30 dB (acceptable) |
@@ -49,7 +51,7 @@ L'étape finale de l'orchestration.
 | **Ratio** | Taux de compression | Maximiser |
 | **Score** | Qualité/Taille pondéré | Maximiser |
 
-
+## 🎯 Formats Supportés
 
 | Format | Type | Usage recommandé |
 |---|---|---|
