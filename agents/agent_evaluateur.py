@@ -116,10 +116,12 @@ class AgentEvaluateur:
         # ── Nettoyage automatique des fichiers de comparaison ────────
         # On supprime physiquement les fichiers de comparaison sur le système
         # après génération des graphes pour s'assurer que n8n ne puisse pas les récupérer
+        chemin_meilleure = meilleure.get("chemin_fichier") if meilleure else None
+        
         for compression in compressions:
-            if compression.get("label") != "recommande":
-                chem = compression.get("chemin_fichier")
-                if chem and os.path.exists(chem):
+            chem = compression.get("chemin_fichier")
+            if chem and chem != chemin_meilleure:
+                if os.path.exists(chem):
                     try:
                         os.remove(chem)
                     except Exception:
