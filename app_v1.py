@@ -409,7 +409,18 @@ if fichier_upload is not None:
                 
                 chemin_c = os.path.join(dossier_cat, nom_fichier)
                 
-                shutil.copy2(chem_meill, chemin_c)
+                shutil.move(chem_meill, chemin_c)
+                
+                # Mettre à jour le JSON pour pointer vers le nouveau chemin
+                if isinstance(rapport_evaluation, dict) and "meilleure_compression" in rapport_evaluation:
+                    rapport_evaluation["meilleure_compression"]["chemin_fichier"] = chemin_c
+                if isinstance(rapport_final, dict):
+                    if "rapport_evaluation" in rapport_final and "meilleure_compression" in rapport_final["rapport_evaluation"]:
+                        rapport_final["rapport_evaluation"]["meilleure_compression"]["chemin_fichier"] = chemin_c
+                    # Optionnel: mettre à jour _toutes_compressions si nécessaire
+                    if "rapport_compression" in rapport_final and "meilleure_compression" in rapport_final["rapport_compression"]:
+                        rapport_final["rapport_compression"]["meilleure_compression"]["chemin_fichier"] = chemin_c
+                        
                 st.session_state["chem_final"] = chemin_c
                 chem_meill = chemin_c
             st.session_state["chemin_meilleure"]    = chem_meill
