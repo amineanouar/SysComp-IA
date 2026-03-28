@@ -1,0 +1,321 @@
+{
+  "name": "agents_compression",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "compression",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        32
+      ],
+      "id": "a73b72d6-f4da-4e50-a90c-c0f8ad1d74ba",
+      "name": "Webhook",
+      "webhookId": "44ba2823-8f24-4268-b2b0-2822b1b6eeda"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://unexacted-mireya-dustier.ngrok-free.dev/compresser",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chemin_image",
+              "value": "={{ $json.chemin_image }}"
+            },
+            {
+              "name": "format_recommande",
+              "value": "={{ $json.format_recommande }}"
+            },
+            {
+              "name": "qualite_recommandee",
+              "value": "={{ $json.qualite_recommandee }}"
+            },
+            {
+              "name": "dossier_sortie",
+              "value": "={{ $json.dossier_sortie }}"
+            },
+            {
+              "name": "format_original",
+              "value": "={{ $json.format_original }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        608,
+        32
+      ],
+      "id": "52f36bef-13d0-434a-81da-1b691335d37e",
+      "name": "Agent_Compresseur"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://unexacted-mireya-dustier.ngrok-free.dev/analyser",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chemin_image",
+              "value": "={{ $json.body.chemin_image }}"
+            },
+            {
+              "name": "categorie",
+              "value": "={{ $json.body.categorie }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        32
+      ],
+      "id": "a8a37e05-611e-465b-a937-4160c189cc9a",
+      "name": "Agent_Analyseur"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://unexacted-mireya-dustier.ngrok-free.dev/classifier",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"rapport\"  : {{ JSON.stringify($('Agent_Analyseur').item.json) }},\n  \"categorie\": \"{{ $('Webhook').item.json.body.categorie }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        32
+      ],
+      "id": "132a53cb-d171-4e5d-93ca-6b21219d091b",
+      "name": "Agent_Classifieur"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data        = $input.item.json;\nconst webhookData = $('Webhook').item.json.body;\nconst categorie   = webhookData.categorie || \"photos\";\n\n// Format original de l'image (depuis Agent 1)\nconst rapport_analyse = $('Agent_Analyseur').item.json;\nconst format_original = rapport_analyse.metadonnees?.format || \"INCONNU\";\n\nconst dossier_sortie = \"D:\\\\Sys_Compression_Automatique\\\\results\\\\\" + categorie;\n\nreturn {\n  json: {\n    format_recommande   : data.format_recommande   || \"JPEG\",\n    qualite_recommandee : data.qualite_recommandee || 85,\n    format_original     : format_original,\n    categorie           : categorie,\n    chemin_image        : webhookData.chemin_image,\n    dossier_sortie      : dossier_sortie,\n    rapport_analyse     : rapport_analyse,\n    recommandation      : data\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        32
+      ],
+      "id": "1f825ed2-fdbc-407f-bd74-75a743bea736",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://unexacted-mireya-dustier.ngrok-free.dev/evaluer",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chemin_originale",
+              "value": "={{ $('Webhook').item.json.body.chemin_image }}"
+            },
+            {
+              "name": "rapport_compression",
+              "value": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        784,
+        32
+      ],
+      "id": "ff3e2364-c0b9-4206-9296-ffee612bffb7",
+      "name": "Agent_Evaluateur"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://unexacted-mireya-dustier.ngrok-free.dev/rapport",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "rapport_analyse",
+              "value": "={{ JSON.stringify($('Agent_Analyseur').item.json) }}"
+            },
+            {
+              "name": "recommandation",
+              "value": "={{ JSON.stringify($('Agent_Classifieur').item.json) }}"
+            },
+            {
+              "name": "rapport_compression",
+              "value": "={{ JSON.stringify($('Agent_Compresseur').item.json) }}"
+            },
+            {
+              "name": "rapport_evaluation",
+              "value": "={{ JSON.stringify($json) }}"
+            },
+            {
+              "name": "format_original",
+              "value": "={{ $('Code in JavaScript').item.json.format_original }}"
+            },
+            {
+              "name": "categorie",
+              "value": "={{ $('Code in JavaScript').item.json.categorie }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        992,
+        32
+      ],
+      "id": "faf2d7d1-0587-42df-a3fb-3024549a109e",
+      "name": "Agent_Rapporteur"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    rapport_analyse     : $('Agent_Analyseur').first().json,\n    recommandation      : $('Agent_Classifieur').first().json,\n    rapport_compression : $('Agent_Compresseur').first().json,\n    rapport_evaluation  : $('Agent_Evaluateur').first().json,\n    rapport_final       : $('Agent_Rapporteur').first().json\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        32
+      ],
+      "id": "4a32077f-c149-4cff-8f8d-2690a8a51de0",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1408,
+        32
+      ],
+      "id": "832914cc-c0df-4716-9907-1237114dbe13",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Agent_Analyseur",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent_Compresseur": {
+      "main": [
+        [
+          {
+            "node": "Agent_Evaluateur",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent_Analyseur": {
+      "main": [
+        [
+          {
+            "node": "Agent_Classifieur",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent_Classifieur": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Agent_Compresseur",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent_Evaluateur": {
+      "main": [
+        [
+          {
+            "node": "Agent_Rapporteur",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent_Rapporteur": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "86187640-f78f-4cc8-8f1e-f19db6266569",
+  "meta": {
+    "instanceId": "f4cba5807ee734ef6c68fa51aeb4fe006d3279280acddc7d5a55d0682d127b6a"
+  },
+  "id": "G230Ud6WhPx7PPRXr_GG8",
+  "tags": []
+}
