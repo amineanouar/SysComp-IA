@@ -21,9 +21,7 @@ results/screenshots/
 *.heif
 
 # Garder les images de présentation
-!logo_fst.jpg
-!banner.png
-!architecture*.svg
+!assets/logo_fst.jpg
 
 # Fichiers et dossiers Jupyter Notebook/Anaconda
 .ipynb_checkpoints/
