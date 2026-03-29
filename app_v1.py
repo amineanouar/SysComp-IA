@@ -19,9 +19,12 @@ import numpy as np
 # ============================================================
 # CONFIGURATION
 # ============================================================
+icon_path = r"D:\Sys_Compression_Automatique\assets\Robot compressing digital image file.png"
+page_icon_img = Image.open(icon_path) if os.path.exists(icon_path) else "🖼️"
+
 st.set_page_config(
-    page_title="Compression Intelligente d'Images",
-    page_icon="🖼️",
+    page_title="SysComp-IA - Compression Intelligente d'Images",
+    page_icon=page_icon_img,
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -73,7 +76,7 @@ chemin_banniere = r"D:\Sys_Compression_Automatique\banner.png"
 if os.path.exists(chemin_banniere):
     st.image(chemin_banniere, use_container_width=True)
 else:
-    st.markdown('<div class="main-title">🖼️ Système Intelligent de Compression d\'Images</div>',
+    st.markdown('<div class="main-title">🖼️ SysComp-IA : Système Intelligent de Compression d\'Images</div>',
                 unsafe_allow_html=True)
     st.markdown('<div class="sub-title">Approche Multi-Agents et IA Générative — FST Mohammedia — Licence IRM 2025-2026</div>',
                 unsafe_allow_html=True)
@@ -85,10 +88,13 @@ st.divider()
 with st.sidebar:
     logo_fst = r"D:\Sys_Compression_Automatique\assets\logo_fst.jpg"
     if os.path.exists(logo_fst):
-        st.image(logo_fst, width=160)
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c2:
+            st.image(logo_fst, use_container_width=True)
     else:
-        st.markdown("### 🎓 FST Mohammedia")
-    st.caption("Université Hassan II de Casablanca")
+        st.markdown("<h3 style='text-align: center;'>🎓 FST Mohammedia</h3>", unsafe_allow_html=True)
+    
+    st.markdown("<p style='text-align: center; color: gray; font-size: 0.9em; margin-top: -10px;'>Université Hassan II de Casablanca</p>", unsafe_allow_html=True)
 
     st.divider()
     st.header("⚙️ Configuration")
@@ -518,7 +524,19 @@ if st.session_state["resultats_prets"]:
         st.subheader("📊 Comparaison de tous les formats")
         evaluations = rapport_evaluation.get("_toutes_evaluations", rapport_evaluation.get("evaluations", []))
         if evaluations:
-            formats  = [f"{e['format']} q={e['qualite']}" for e in evaluations]
+            def format_label(e):
+                label = e['format']
+                # Si c'est le format original, on met la parenthèse à la ligne pour gagner de la place
+                if "ORIGINAL" in label:
+                    label = label.replace(" (", "\n(")
+                
+                # On ajoute la qualité seulement si elle est définie
+                q = str(e['qualite'])
+                if q != "N/A" and q != "None":
+                    label += f"\nq={q}"
+                return label
+
+            formats  = [format_label(e) for e in evaluations]
             psnr_v   = [e["psnr_db"]              for e in evaluations]
             ssim_v   = [e["ssim"]                 for e in evaluations]
             taux_v   = [e["taux_compression_pct"] for e in evaluations]
@@ -541,7 +559,7 @@ if st.session_state["resultats_prets"]:
                     ax.legend(fontsize=8)
                 ax.set_title(title, fontsize=11, fontweight='bold')
                 ax.set_xticks(x)
-                ax.set_xticklabels(formats, rotation=15, fontsize=8)
+                ax.set_xticklabels(formats, rotation=0, fontsize=8, ha='center')
                 ax.set_ylabel(ylabel)
                 ax.set_facecolor('#f8f9fa')
                 for bar, val in zip(bars, vals):
