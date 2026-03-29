@@ -5,7 +5,12 @@ opencv-python
 scikit-image
 numpy
 scipy
-anthropic
 python-dotenv
 matplotlib
 tqdm
+groq
+cohere
+mistralai
+pytesseract
+Flask
+streamlit
