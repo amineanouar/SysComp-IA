@@ -4,7 +4,6 @@ import json
 import os
 import tempfile
 from PIL import Image
-
 try:
     import pillow_heif
     pillow_heif.register_heif_opener()
@@ -14,12 +13,8 @@ try:
     import pillow_avif
 except ImportError:
     pass
-
 import matplotlib.pyplot as plt
 import numpy as np
-
-# Calcul dynamique du chemin racine du projet
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ============================================================
 # CONFIGURATION
@@ -32,7 +27,7 @@ st.set_page_config(
 )
 
 API_URL     = "http://localhost:5000"
-WEBHOOK_N8N = "https://z3ar.app.n8n.cloud/webhook-test/compression"
+WEBHOOK_N8N = "https://n8n.ismailslab.com/webhook/compression"
 TIMEOUT     = 300
 MAX_PIXELS  = 4000 * 4000
 MODE        = "flask"
@@ -74,9 +69,7 @@ st.markdown("""
 # ============================================================
 # BANNIERE
 # ============================================================
-# CORRECTION : Chemin dynamique pour la bannière
-chemin_banniere = os.path.join(BASE_DIR, "banner.png")
-
+chemin_banniere = r"D:\Sys_Compression_Automatique\banner.png"
 if os.path.exists(chemin_banniere):
     st.image(chemin_banniere, use_container_width=True)
 else:
@@ -90,9 +83,7 @@ st.divider()
 # SIDEBAR
 # ============================================================
 with st.sidebar:
-    # CORRECTION : Chemin dynamique pour le logo
-    logo_fst = os.path.join(BASE_DIR, "assets", "logo_fst.jpg")
-    
+    logo_fst = r"D:\Sys_Compression_Automatique\assets\logo_fst.jpg"
     if os.path.exists(logo_fst):
         st.image(logo_fst, width=160)
     else:
@@ -162,6 +153,7 @@ with col_config:
     afficher_json    = st.checkbox("Afficher le rapport JSON",        value=False)
     comparer_formats = st.checkbox("Comparer tous les formats",       value=True)
 
+    # ← NOUVEAU
     st.divider()
     st.markdown("**📐 Redimensionnement**")
     forcer_dimension = st.checkbox("Forcer une dimension fixe", value=False)
@@ -224,8 +216,10 @@ if fichier_upload is not None:
         rapport_final       = {}
 
         try:
-            # CORRECTION : Dossier de sortie 100% dynamique (OS-agnostic)
-            dossier_cat = os.path.join(BASE_DIR, "results", categorie)
+            # Dossier de sortie = results/{categorie} directement
+            dossier_cat = os.path.join(
+                r"D:\Sys_Compression_Automatique\results", categorie
+            )
             os.makedirs(dossier_cat, exist_ok=True)
 
             with tempfile.NamedTemporaryFile(
@@ -235,6 +229,7 @@ if fichier_upload is not None:
                 tmp.write(fichier_upload.getvalue())
                 chemin_tmp = tmp.name
 
+            img_check = Image.open(chemin_tmp)
             from PIL import ImageOps
             img_check = Image.open(chemin_tmp).convert("RGB")
 
@@ -278,7 +273,9 @@ if fichier_upload is not None:
                     st.error(f"❌ Erreur n8n : status {r_n8n.status_code}")
                     st.stop()
 
+                # ── Fonction utilitaire : convertir string → dict ────────
                 def parse(val):
+                    """Convertit une string JSON en dict si nécessaire."""
                     if val is None:
                         return {}
                     if isinstance(val, str):
@@ -292,21 +289,26 @@ if fichier_upload is not None:
                         return val[0] if isinstance(val[0], dict) else {}
                     return {}
 
+                # ── n8n retourne une liste → prendre le 1er élément ─────
                 raw = r_n8n.json()
                 if isinstance(raw, list):
                     raw = raw[0] if raw else {}
 
+                # ── Extraire chaque rapport ──────────────────────────────
                 rapport_analyse     = parse(raw.get("rapport_analyse"))
                 recommandation      = parse(raw.get("recommandation"))
                 rapport_compression = parse(raw.get("rapport_compression"))
                 rapport_evaluation  = parse(raw.get("rapport_evaluation"))
                 rapport_final       = parse(raw.get("rapport_final"))
 
+                # ── Si les clés n'existent pas → n8n retourne Agent5 direct
                 if not rapport_evaluation:
+                    # n8n retourne directement le rapport Agent5
                     rapport_final      = raw
                     detail_evals       = raw.get("detail_evaluations", [])
                     meilleure_eval     = {}
                     if detail_evals:
+                        # Chercher celle avec label "recommande"
                         for e in detail_evals:
                             if e.get("label") == "recommande":
                                 meilleure_eval = e
@@ -385,6 +387,7 @@ if fichier_upload is not None:
                 st.success("✅ Agent 5 — Rapport généré")
                 st.balloons()
 
+            # ── Sauvegarder dans session_state ───────────────────────────
             st.session_state["resultats_prets"]     = True
             st.session_state["rapport_final"]       = rapport_final
             st.session_state["rapport_evaluation"]  = rapport_evaluation
@@ -392,6 +395,8 @@ if fichier_upload is not None:
             st.session_state["rapport_analyse"]     = rapport_analyse
             st.session_state["taille_originale_kb"] = taille_originale_kb
             
+            # L'image compressée est déjà dans results/{categorie}/
+            # On récupère simplement son chemin depuis le rapport
             chem_meill = rapport_evaluation.get(
                 "meilleure_compression", {}
             ).get("chemin_fichier", "") if isinstance(rapport_evaluation, dict) else ""
@@ -427,6 +432,7 @@ if st.session_state["resultats_prets"]:
     st.divider()
     st.header("📊 Résultats de la Compression")
 
+    # ── Recommandation Multi-LLM ─────────────────────────────
     st.subheader("🤖 Recommandation Multi-LLM")
     multi = recommandation.get("multi_llm", {}) if isinstance(recommandation, dict) else {}
     col_g, col_c, col_m, col_res = st.columns(4)
@@ -463,6 +469,7 @@ if st.session_state["resultats_prets"]:
 
     st.divider()
 
+    # ── Métriques ────────────────────────────────────────────
     st.subheader("📈 Métriques de Qualité")
     col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
     with col_m1:
@@ -484,6 +491,7 @@ if st.session_state["resultats_prets"]:
 
     st.divider()
 
+    # ── Comparaison Avant / Après ─────────────────────────────
     st.subheader("🖼️ Comparaison Avant / Après")
     if chemin_meilleure and os.path.exists(chemin_meilleure):
         col_avant, col_apres = st.columns(2)
@@ -505,6 +513,7 @@ if st.session_state["resultats_prets"]:
 
     st.divider()
 
+    # ── Graphiques ────────────────────────────────────────────
     if comparer_formats and isinstance(rapport_evaluation, dict):
         st.subheader("📊 Comparaison de tous les formats")
         evaluations = rapport_evaluation.get("_toutes_evaluations", rapport_evaluation.get("evaluations", []))
@@ -544,6 +553,7 @@ if st.session_state["resultats_prets"]:
 
     st.divider()
 
+    # ── Téléchargement ────────────────────────────────────────
     st.subheader("📥 Télécharger les fichiers")
     col_dl1, col_dl2 = st.columns(2)
     with col_dl1:
@@ -570,6 +580,7 @@ if st.session_state["resultats_prets"]:
             key="btn_dl_json"
         )
 
+    # ── Features extraites ────────────────────────────────────
     if afficher_details and isinstance(rapport_analyse, dict):
         st.divider()
         st.subheader("🔬 Features extraites (Agent 1)")
@@ -593,11 +604,13 @@ if st.session_state["resultats_prets"]:
             st.metric("Nb mots",        ocr.get("nb_mots", 0))
             st.metric("Confiance OCR", f"{ocr.get('confiance_moyenne', 0)}%")
 
+    # ── Rapport JSON ──────────────────────────────────────────
     if afficher_json:
         st.divider()
         st.subheader("📄 Rapport JSON complet")
         st.json(rapport_final)
 
+# ── Message d'accueil ─────────────────────────────────────────
 elif fichier_upload is None:
     st.info("👆 Uploadez une image pour commencer l'analyse intelligente")
     col1, col2, col3, col4 = st.columns(4)
