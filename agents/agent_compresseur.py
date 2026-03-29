@@ -209,6 +209,27 @@ class AgentCompresseur:
             ))
         elif not fast_mode and not AVIF_DISPONIBLE:
             print("  AVIF non disponible - pillow-avif non installe")
+
+        # ── Fallback si taux negatif ─────────────────────────
+        import shutil
+        for res in resultats_compression:
+            if res.get("statut") == "succes" and res.get("taux_compression_pct", 0) < 0:
+                print(f"  [Fallback] Taux negatif ({res.get('taux_compression_pct')}%) pour {res.get('format')}. Copie de l'original.")
+                try:
+                    if os.path.exists(res["chemin_fichier"]):
+                        os.remove(res["chemin_fichier"])
+                    ext_orig = os.path.splitext(chemin_image)[1]
+                    nouveau_chemin = os.path.splitext(res["chemin_fichier"])[0] + "_fallback" + ext_orig
+                    shutil.copy2(chemin_image, nouveau_chemin)
+                    
+                    res["format"]               = f"ORIGINAL ({res.get('format')} annule)"
+                    res["chemin_fichier"]       = nouveau_chemin
+                    res["taille_compresse_kb"]  = res["taille_originale_kb"]
+                    res["taux_compression_pct"] = 0.0
+                    res["ratio_compression"]    = 1.0
+                except Exception as e:
+                    print(f"  Erreur lors du fallback: {e}")
+
         # ── Choisir le meilleur résultat ─────────────────────
         succes   = [c for c in resultats_compression if c.get("statut") == "succes"]
         meilleur = None
