@@ -2,6 +2,15 @@
 
 Ce projet est un système automatique et intelligent dédié à l'optimisation et la compression d'images. Basé sur une approche **Multi-Agents**, il combine le traitement d'images classique (OpenCV, Scikit-Image) avec des LLMs (Groq, Cohere, Mistral) pour choisir dynamiquement **le meilleur format (WebP, AVIF, HEIF, etc.)** et **la meilleure qualité** selon le contenu de l'image (Photo, Document, Screenshot...).
 
+## ✨ Fonctionnalités Principales
+
+- **Automatisation avec n8n :** Le projet est entièrement conçu pour être orchestré via n8n (le fichier `workflow_agents.json` est inclus). Chaque étape est une route API distincte pour une agilité maximale.
+- **Rétroaction Intelligente (Backtracking) :** Si la compression dégrade trop l'image (Score SSIM trop bas), le système s'auto-corrige et refait un essai avec une qualité supérieure avant de valider le résultat final.
+- **Vote Majoritaire LLM :** Consensus entre 3 intelligences artificielles pour décider du meilleur format cible.
+- **Analyse d'Image Poussée :** Détection de texte (OCR), analyse mathématique de la texture (GLCM) et de l'entropie.
+
+---
+
 ## 🌟 Architecture Multi-Agents
 
 L'innovation principale de ce projet repose sur une architecture où 5 agents spécialisés collaborent de manière séquentielle pour garantir un résultat optimal.
@@ -34,22 +43,14 @@ L'étape finale de l'orchestration.
 - Génère un fichier **JSON complet** traçant tout l'historique de la décision (Pourquoi tel format a été choisi ? Quelles étaient les recommandations de Groq vs Mistral ?).
 - Renvoie toutes ces données de manière structurée au Frontend Streamlit pour l'affichage des graphiques et des métriques.
 
+---
+
 ## 🛠️ Technologies Utilisées
-- **Frontend** : Streamlit
-- **Backend** : Flask / API REST
-- **Traitement d'Image** : OpenCV, Scikit-Image, Pillow (avec plugins HEIF/AVIF)
+- **Orchestration Workflow** : n8n
+- **Frontend UI** : Streamlit
+- **Backend Serveur** : Flask / API REST
+- **Traitement d'Image** : OpenCV, Scikit-Image, Pillow (avec plugins HEIF/AVIF), Tesseract OCR
 - **Modèles de Langage (LLM)** : Groq, Cohere, Mistral
-- **Visualisation** : Matplotlib
-
-## 📊 Métriques Implémentées
-
-| Métrique | Description | Valeur idéale |
-|---|---|---|
-| **PSNR** | Peak Signal-to-Noise Ratio | ∞ (identique), > 30 dB (acceptable) |
-| **SSIM** | Structural Similarity Index | 1.0 (identique), > 0.80 (acceptable) |
-| **MSE** | Mean Squared Error | 0 (identique) |
-| **Ratio** | Taux de compression | Maximiser |
-| **Score** | Qualité/Taille pondéré | Maximiser |
 
 ## 🎯 Formats Supportés
 
@@ -61,75 +62,82 @@ L'étape finale de l'orchestration.
 | HEIF* | Avancé | Photos mobiles |
 | AVIF* | Avancé | Compression maximale |
 
+---
+
 ## 📦 Installation et Prérequis
 
-1. **Cloner le répertoire :**
-   ```bash
-   git clone https://github.com/ton-nom-utilisateur/Sys_Compression_Automatique.git
-   cd Sys_Compression_Automatique
-   ```
+**1. Cloner le répertoire :**
+```bash
+git clone https://github.com/amineanouar/Sys_Compression_Automatique.git
+cd Sys_Compression_Automatique
+```
 
-2. **Installer les dépendances :**
-   Assurez-vous d'avoir Python installé, puis exécutez :
-   ```bash
-   pip install -r requirements.txt
-   ```
+**2. Installer Tesseract-OCR (Très important !) :**
+L'Agent 1 utilise la détection de texte. Vous devez absolument avoir [Tesseract OCR installé sur votre machine Windows](https://github.com/UB-Mannheim/tesseract/wiki). Vérifiez ensuite que votre variable d'environnement `TESSERACT_CMD` pointe bien vers `.exe` dans votre fichier `.env`.
 
-3. **Variables d'Environnement :**
-   Copiez le fichier `.env.example` en `.env` (ou créez-le) et ajoutez-y vos clés API :
-   ```env
-   GROQ_API_KEY=votre_cle_groq
-   COHERE_API_KEY=votre_cle_cohere
-   MISTRAL_API_KEY=votre_cle_mistral
-   ```
+**3. Installer les dépendances Python :**
+Assurez-vous d'avoir Python 3.9+ installé, puis exécutez :
+```bash
+pip install -r requirements.txt
+```
+
+**4. Variables d'Environnement :**
+Copiez le modèle `.env.example` en le renommant `.env` et ajoutez-y vos clés API exactes :
+```env
+GROQ_API_KEY=votre_cle_groq
+COHERE_API_KEY=votre_cle_cohere
+MISTRAL_API_KEY=votre_cle_mistral
+
+# Chemin d'installation de Tesseract sur votre machine (Modifiez si différent)
+TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe
+```
+
+---
 
 ## 🚀 Démarrage de l'Application
 
-Le système fonctionne avec deux composants distincts fonctionnant en parallèle (Backend et Frontend).
+Le système fonctionne avec des composants distincts (API Backend, Frontend UI, et Automatisateur).
 
-**Terminal 1 : Lancer le Backend (API Flask)**
-Ce serveur fait tourner l'intelligence artificielle et l'orchestration des agents.
+**Terminal 1 : Lancer le Backend (Le Cerveau - API Flask)**
+Ce serveur expose les 5 agents via des routes REST (sans interface).
 ```bash
 python api.py
 ```
 
-**Terminal 2 : Lancer le Frontend (Streamlit)**
-Lancez l'interface graphique interactive pour l'utilisateur.
+**Terminal 2 : Lancer le Frontend V1 (Interface Utilisateur)**
+Lancez l'interface graphique interactive pour envoyer manuellement une image.
 ```bash
-streamlit run app.py
+streamlit run app_v1.py
 ```
+
+*(Optionnel) Lancer le Workflow Automatisé n8n :* 
+Importez le fichier `workflow/workflow_agents.json` dans votre logiciel n8n local pour utiliser l'automatisation de bout en bout de ces APIs Flask.
+
+---
 
 ## 📁 Structure et Fichiers Principaux
 
-La séparation des fichiers garantit une architecture propre et modulaire (séparation Frontend / Backend) :
-
-- **`api.py` (Le Backend / Cerveau)** : C'est le serveur Flask. Il ne possède aucune interface graphique. Son seul but est de recevoir les requêtes web, de déclencher les 5 agents Python de manière séquentielle, et de renvoyer le rapport final en JSON. C'est l'API REST de l'application.
-- **`app_v1.py` (Ancienne Interface)** : C'est une version précédente (ou une variante simplifiée) du frontend Streamlit, probablement conservée pour des raisons de tests, de développement ou pour garder la trace d'une ancienne interface de validation.
-- **`agents/`** : Dossier contenant l'intelligence artificielle pure (modules Python de chaque agent).
-- **`dataset/` & `results/`** : Les répertoires de stockage des images originales en entrée et compressées en sortie, classées par dossier selon le type d'image.
-
-### 📁Voici l'organisation de notre projet :
+La séparation des fichiers garantit une architecture propre et modulaire (API / UI / Agents) :
 
 ```text
 Sys_Compression_Automatique/
-├── agents/                  # IA pure (Modules Python des 5 agents)
-│   ├── agent_analyseur.py   # Extraction des caractéristiques visuelles
-│   ├── agent_classifier.py  # Prise de décision (Groq, Cohere, Mistral)
+├── agents/                  # IA pure (Modules Python des 5 agents indépendants)
+│   ├── agent_analyseur.py   # Extraction (Entropie, GLCM, OCR Tesseract)
+│   ├── agent_classifier.py  # Vote majoritaire LLM (Groq, Cohere, Mistral)
 │   ├── agent_compresseur.py # Exécution de la compression
-│   ├── agent_evaluateur.py  # Calcul des métriques (PSNR, SSIM, MSE)
-│   └── agent_rapporteur.py  # Génération du rapport final JSON
-├── dataset/                 # Images originales en entrée
-├── results/                 # Images compressées et rapports JSON
-├── .ipynb_checkpoints/      # Sauvegarde Jupyter (Environnement dev)
-├── anaconda_projects/       # Configurations Anaconda
-├── .env                     # Variables d'environnement (Clés API)
-├── .gitignore               # Fichiers ignorés par Git (ex: .env)
-├── api.py                   # Backend : Serveur Flask REST
-├── app_v1.py                # Frontend : Interface Streamlit
-├── logo_fst.jpg             # Logo de la FST Mohammedia
-├── ngrok.exe                # Tunneling pour exposer l'API
-├── README.md                # Documentation du projet
-└── requirements.txt         # Dépendances et bibliothèques Python
+│   ├── agent_evaluateur.py  # Calcul (PSNR, SSIM) & Backtracking QA
+│   └── agent_rapporteur.py  # Synthèse et JSON Final
+├── dataset/                 # Base d'images de test pour le benchmark
+├── results/                 # Sorties (Images finales compressées et JSON)
+├── workflow/                # Scripts d'automatisation
+│   └── workflow_agents.json # Template n8n pour orchestrer l'API Flask
+├── .env.example             # Modèle vide pour les clés API sécurisées
+├── api.py                   # Serveur REST Backend (L'intelligence)
+├── app_v1.py                # Dashboard Frontend interactif sous Streamlit
+├── ngrok.exe                # Tunneling (Si l'API est exposée en ligne)
+├── README.md                # Documentation détaillée du projet
+└── requirements.txt         # Librairies Python requises
 ```
+
 ## 🎓 Contexte
-Projet réalisé dans le cadre de l'Université Hassan II - FST Mohammedia.
+Projet académique réalisé dans le cadre de l'**Université Hassan II - FST Mohammedia**.
