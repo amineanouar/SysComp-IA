@@ -22,7 +22,8 @@ results/screenshots/
 
 # Garder les images de présentation
 !logo_fst.jpg
-
+!banner.png
+!architecture*.svg
 
 # Fichiers et dossiers Jupyter Notebook/Anaconda
 .ipynb_checkpoints/
@@ -36,3 +37,4 @@ anaconda_projects/
 
 # Fichiers exécutables lourds
 ngrok.exe
+tesseract-ocr-w64-setup*.exe
