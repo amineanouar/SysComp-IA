@@ -53,20 +53,23 @@ class AgentCompresseur:
 
         os.makedirs(dossier_sortie, exist_ok=True)
 
-        image_originale = Image.open(chemin_image)
+        image_source = Image.open(chemin_image)
+        image_png = image_source.copy()
 
-        # Conversion RGB si necessaire
-        if image_originale.mode in ["RGBA", "P", "LA"]:
-            fond_blanc = Image.new("RGB", image_originale.size, (255, 255, 255))
-            if image_originale.mode == "RGBA":
-                fond_blanc.paste(image_originale, mask=image_originale.split()[3])
+        # Conversion RGB si necessaire pour JPG, WEBP, etc.
+        if image_source.mode in ["RGBA", "P", "LA"]:
+            fond_blanc = Image.new("RGB", image_source.size, (255, 255, 255))
+            if image_source.mode == "RGBA":
+                fond_blanc.paste(image_source, mask=image_source.split()[3])
             else:
-                fond_blanc.paste(image_originale)
-            image_originale = fond_blanc
-        elif image_originale.mode != "RGB":
-            image_originale = image_originale.convert("RGB")
+                fond_blanc.paste(image_source)
+            image_rgb = fond_blanc
+        elif image_source.mode != "RGB":
+            image_rgb = image_source.convert("RGB")
+        else:
+            image_rgb = image_source.copy()
 
-        largeur_orig, hauteur_orig = image_originale.size
+        largeur_orig, hauteur_orig = image_rgb.size
 
         # ── Redimensionnement 4K si trop grande ──────────────
         MAX_PIXELS = 4000 * 4000
@@ -76,7 +79,13 @@ class AgentCompresseur:
             ratio            = (MAX_PIXELS / nb_pixels) ** 0.5
             nouvelle_largeur = int(largeur_orig * ratio)
             nouvelle_hauteur = int(hauteur_orig * ratio)
-            image_originale  = image_originale.resize(
+            
+            image_rgb  = image_rgb.resize(
+                (nouvelle_largeur, nouvelle_hauteur), Image.LANCZOS
+            )
+            if image_png.mode == 'P':
+                image_png = image_png.convert('RGBA')
+            image_png  = image_png.resize(
                 (nouvelle_largeur, nouvelle_hauteur), Image.LANCZOS
             )
             print(f"  Redim 4K : {largeur_orig}x{hauteur_orig} "
@@ -88,9 +97,17 @@ class AgentCompresseur:
         # → pas de déformation, ratio conservé
         if self.DIMENSION_CIBLE is not None:
             target_w, target_h = self.DIMENSION_CIBLE
-            if image_originale.size != (target_w, target_h):
-                image_originale = ImageOps.fit(
-                    image_originale,
+            if image_rgb.size != (target_w, target_h):
+                image_rgb = ImageOps.fit(
+                    image_rgb,
+                    (target_w, target_h),
+                    method    = Image.LANCZOS,
+                    centering = (0.5, 0.5)
+                )
+                if image_png.mode == 'P':
+                    image_png = image_png.convert('RGBA')
+                image_png = ImageOps.fit(
+                    image_png,
                     (target_w, target_h),
                     method    = Image.LANCZOS,
                     centering = (0.5, 0.5)
@@ -109,8 +126,9 @@ class AgentCompresseur:
 
         # COMPRESSION 1 : Format recommande par le LLM — PRIORITE ABSOLUE
         print(f"  Compression prioritaire LLM : {format_rec} q={qualite_rec}%")
+        img_a_compresser = image_png if format_rec == "PNG" else image_rgb
         resultats_compression.append(self._compresser_format(
-            image               = image_originale,
+            image               = img_a_compresser,
             nom_base            = nom_base,
             format_cible        = format_rec,
             qualite             = qualite_rec,
@@ -125,7 +143,7 @@ class AgentCompresseur:
         # COMPRESSION 2 : JPEG qualite 85 (comparaison)
         if not fast_mode and format_rec != "JPEG":
             resultats_compression.append(self._compresser_format(
-                image               = image_originale,
+                image               = image_rgb,
                 nom_base            = nom_base,
                 format_cible        = "JPEG",
                 qualite             = 85,
@@ -138,7 +156,7 @@ class AgentCompresseur:
         # COMPRESSION 3 : WEBP qualite 80 (comparaison)
         if not fast_mode and format_rec != "WEBP":
             resultats_compression.append(self._compresser_format(
-                image               = image_originale,
+                image               = image_rgb,
                 nom_base            = nom_base,
                 format_cible        = "WEBP",
                 qualite             = 80,
@@ -151,7 +169,7 @@ class AgentCompresseur:
         # COMPRESSION 4 : PNG sans perte (comparaison)
         if not fast_mode and format_rec != "PNG":
             resultats_compression.append(self._compresser_format(
-                image               = image_originale,
+                image               = image_png,
                 nom_base            = nom_base,
                 format_cible        = "PNG",
                 qualite             = 95,
@@ -165,7 +183,7 @@ class AgentCompresseur:
         if not fast_mode and HEIF_DISPONIBLE:
             label_heif = "recommande" if format_rec == "HEIF" else "heif_80"
             resultats_compression.append(self._compresser_format(
-                image               = image_originale,
+                image               = image_rgb,
                 nom_base            = nom_base,
                 format_cible        = "HEIF",
                 qualite             = qualite_rec if format_rec == "HEIF" else 80,
@@ -180,7 +198,7 @@ class AgentCompresseur:
         # COMPRESSION 6 : AVIF — seulement si pas déjà le format recommandé
         if not fast_mode and AVIF_DISPONIBLE and format_rec != "AVIF":
             resultats_compression.append(self._compresser_format(
-                image               = image_originale,
+                image               = image_rgb,
                 nom_base            = nom_base,
                 format_cible        = "AVIF",
                 qualite             = 80,
