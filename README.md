@@ -1,4 +1,4 @@
-# Système Intelligent de Compression d'Images 🖼️🤖
+# SysComp-IA : Système Intelligent de Compression d'Images 🖼️🤖
 
 Ce projet est un système automatique et intelligent dédié à l'optimisation et la compression d'images. Basé sur une approche **Multi-Agents**, il combine le traitement d'images classique (OpenCV, Scikit-Image) avec des LLMs (Groq, Cohere, Mistral) pour choisir dynamiquement **le meilleur format (WebP, AVIF, HEIF, etc.)** et **la meilleure qualité** selon le contenu de l'image (Photo, Document, Screenshot...).
 
@@ -68,8 +68,8 @@ L'étape finale de l'orchestration.
 
 **1. Cloner le répertoire :**
 ```bash
-git clone https://github.com/amineanouar/Sys_Compression_Automatique.git
-cd Sys_Compression_Automatique
+git clone https://github.com/amineanouar/SysComp-IA.git
+cd SysComp-IA
 ```
 
 **2. Installer Tesseract-OCR (Très important !) :**
@@ -120,7 +120,7 @@ Importez le fichier `workflow/workflow_agents.json` dans votre logiciel n8n loca
 La séparation des fichiers garantit une architecture propre et modulaire (API / UI / Agents) :
 
 ```text
-Sys_Compression_Automatique/
+SysComp-IA/
 ├── agents/                  # IA pure (Modules Python des 5 agents indépendants)
 │   ├── agent_analyseur.py   # Extraction (Entropie, GLCM, OCR Tesseract)
 │   ├── agent_classifier.py  # Vote majoritaire LLM (Groq, Cohere, Mistral)
