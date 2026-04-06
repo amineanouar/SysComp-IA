@@ -471,7 +471,7 @@ if st.session_state["resultats_prets"]:
             st.error(f"❌ Format : {format_final}\n\nQualité : {qualite_final}%\n\n⚡ Désaccord total")
 
     if isinstance(recommandation, dict) and recommandation.get("justification"):
-        st.info(f"💬 **Justification LLM :** {recommandation.get('justification', '')[:400]}")
+        st.info(f"💬 **Justifications LLMs :**\n\n{recommandation.get('justification', '')}")
 
     st.divider()
 
@@ -526,11 +526,15 @@ if st.session_state["resultats_prets"]:
         if evaluations:
             def format_label(e):
                 label = e['format']
-                # Si c'est le format original, on met la parenthèse à la ligne pour gagner de la place
+                # Si c'est l'original, on extrait proprement son vrai format
                 if "ORIGINAL" in label:
-                    label = label.replace(" (", "\n(")
+                    if "(" in label and ")" in label:
+                        ext = label.split("(")[1].split(")")[0].replace(" annule", "").strip()
+                        label = f"ORIGINAL\n({ext})"
+                    else:
+                        label = "ORIGINAL"
                 
-                # On ajoute la qualité seulement si elle est définie
+                # On ajoute la qualité seulement si elle est définie de manière propre
                 q = str(e['qualite'])
                 if q != "N/A" and q != "None":
                     label += f"\nq={q}"
@@ -557,16 +561,52 @@ if st.session_state["resultats_prets"]:
                     ax.axhline(y=seuil, color="red", linestyle="--", alpha=0.7,
                                label=f"Seuil {seuil}")
                     ax.legend(fontsize=8)
-                ax.set_title(title, fontsize=11, fontweight='bold')
+                ax.set_title(title, fontsize=11, fontweight='bold', pad=12)
                 ax.set_xticks(x)
-                ax.set_xticklabels(formats, rotation=0, fontsize=8, ha='center')
+                ax.set_xticklabels(formats, rotation=0, fontsize=7.5, ha='center')
                 ax.set_ylabel(ylabel)
                 ax.set_facecolor('#f8f9fa')
+                
+                # --- ZOOM DYNAMIQUE SUR L'AXE Y ---
+                # Pour éviter que les petits écarts ne soient écrasés visuellement !
+                if "PSNR" in title:
+                    # Ignorer les 100.0 (images originales) pour le calcul de l'échelle max
+                    psnr_reels = [v for v in vals if v < 99.0]
+                    if psnr_reels:
+                        # Ajouter un peu plus d'espace en haut
+                        y_max = max(psnr_reels) + 15
+                        y_min = max(0, min(psnr_reels) - 5)
+                        ax.set_ylim(y_min, y_max)
+                elif "SSIM" in title:
+                    ax.set_ylim(max(0.5, min(vals) - 0.03), 1.05)
+                elif "Score" in title:
+                    ax.set_ylim(max(0, min(vals) - 5), min(105, max(vals) + 10))
+                else: 
+                    # Taux de compression
+                    ax.set_ylim(0, max(vals) + 15 if vals else 100)
+
                 for bar, val in zip(bars, vals):
-                    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
-                            f"{val:.1f}", ha='center', va='bottom', fontsize=8, fontweight='bold')
-            plt.suptitle("Comparaison des compressions", fontsize=13, fontweight='bold')
+                    y_min, y_max = ax.get_ylim()
+                    y_range = y_max - y_min
+                    is_clipped = bar.get_height() >= y_max - (0.02 * y_range)
+                    
+                    if is_clipped:
+                        # Si la barre dépasse le plafond, on met le texte juste en dessous
+                        y_pos = y_max - 0.02 * y_range
+                        va = 'top'
+                    else:
+                        # Sinon au-dessus de la barre
+                        y_pos = bar.get_height() + 0.02 * y_range
+                        va = 'bottom'
+                        
+                    # Le SSIM nécessite 3 décimales pour être précis, les autres 1 seule
+                    texte_val = f"{val:.3f}" if "SSIM" in title else f"{val:.1f}"
+                    ax.text(bar.get_x() + bar.get_width()/2, y_pos,
+                            texte_val, ha='center', va=va, fontsize=9, fontweight='bold', color='black')
+            plt.suptitle("Comparaison des compressions (Échelles Zoomées)", fontsize=13, fontweight='bold')
             plt.tight_layout()
+            # Ajuster le haut pour s'assurer que le main title ne chevauche pas
+            plt.subplots_adjust(top=0.82)
             st.pyplot(fig)
 
     st.divider()
