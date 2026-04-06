@@ -1,3 +1,7 @@
+Flask
+streamlit
+requests
+pytesseract
 Pillow
 pillow-avif-plugin
 pillow-heif
@@ -11,6 +15,3 @@ tqdm
 groq
 cohere
 mistralai
-pytesseract
-Flask
-streamlit
