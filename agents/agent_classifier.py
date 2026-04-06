@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import concurrent.futures
 from datetime import datetime
 from groq import Groq
 import cohere
@@ -117,16 +118,15 @@ REPONDS UNIQUEMENT EN JSON valide :
 }}
 """
 
-        print("  LLM1 : Appel Groq/Llama3...")
-        rec1 = self._appeler_groq(prompt, rapport_agent1)
-        time.sleep(1)
-
-        print("  LLM2 : Appel Cohere...")
-        rec2 = self._appeler_cohere(prompt, rapport_agent1)
-        time.sleep(1)
-
-        print("  LLM3 : Appel Mistral...")
-        rec3 = self._appeler_mistral(prompt, rapport_agent1)
+        print("  Appel en parallèle (concurrent) des 3 LLMs...")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            future_groq    = executor.submit(self._appeler_groq, prompt, rapport_agent1)
+            future_cohere  = executor.submit(self._appeler_cohere, prompt, rapport_agent1)
+            future_mistral = executor.submit(self._appeler_mistral, prompt, rapport_agent1)
+            
+            rec1 = future_groq.result()
+            rec2 = future_cohere.result()
+            rec3 = future_mistral.result()
 
         meilleure = self._vote_majoritaire(rec1, rec2, rec3, rapport_agent1)
 
@@ -178,7 +178,10 @@ REPONDS UNIQUEMENT EN JSON valide :
     # ------------------------------------------------------------------
     def _appeler_groq(self, prompt, rapport_agent1):
         try:
-            reponse = self.groq_client.chat.completions.create(
+            # Instanciation locale pour éviter les collisions de threads (httpx)
+            groq_key = os.getenv("GROQ_API_KEY")
+            client_local = Groq(api_key=groq_key)
+            reponse = client_local.chat.completions.create(
                 model    = self.groq_modele,
                 messages = [
                     {"role": "system", "content": "Reponds UNIQUEMENT en JSON valide."},
@@ -198,7 +201,10 @@ REPONDS UNIQUEMENT EN JSON valide :
     # ------------------------------------------------------------------
     def _appeler_cohere(self, prompt, rapport_agent1):
         try:
-            reponse = self.cohere_client.chat(
+            # Instanciation locale pour éviter les collisions de threads
+            cohere_key = os.getenv("COHERE_API_KEY")
+            client_local = cohere.ClientV2(api_key=cohere_key)
+            reponse = client_local.chat(
                 model    = self.cohere_modele,
                 messages = [
                     {"role": "system", "content": "Reponds UNIQUEMENT en JSON valide."},
@@ -217,7 +223,10 @@ REPONDS UNIQUEMENT EN JSON valide :
     # ------------------------------------------------------------------
     def _appeler_mistral(self, prompt, rapport_agent1):
         try:
-            reponse = self.mistral_client.chat.complete(
+            # Instanciation locale pour les threads
+            mistral_key = os.getenv("MISTRAL_API_KEY")
+            client_local = Mistral(api_key=mistral_key)
+            reponse = client_local.chat.complete(
                 model    = self.mistral_modele,
                 messages = [
                     {"role": "system", "content": "Reponds UNIQUEMENT en JSON valide."},
@@ -262,17 +271,23 @@ REPONDS UNIQUEMENT EN JSON valide :
         nb_votes       = votes[format_gagnant]
         print(f"  Votes : {votes} → Gagnant : {format_gagnant} ({nb_votes}/3)")
 
-        for rec in [rec1, rec2, rec3]:
-            if rec.get("format_recommande") == format_gagnant:
-                qualites = [
-                    r.get("qualite_recommandee", 85)
-                    for r in [rec1, rec2, rec3]
-                    if r.get("format_recommande") == format_gagnant
-                ]
-                rec["qualite_recommandee"] = int(sum(qualites) / len(qualites))
-                rec["llm_source"]          = f"vote_majoritaire_{nb_votes}_sur_3"
-                rec["statut"]              = "succes"
-                return rec
+        llms_gagnants = [r for r in [rec1, rec2, rec3] if r.get("format_recommande") == format_gagnant]
+        if llms_gagnants:
+            qualites = [r.get("qualite_recommandee", 85) for r in llms_gagnants]
+            justifications = []
+            for r in [rec1, rec2, rec3]:
+                src = r.get("llm_source", "inconnu").upper()
+                just = r.get("justification", "Pas de justification")
+                justifications.append(f"**{src}** :\n{just}")
+
+            justification_finale = "\n\n".join(justifications)
+
+            rec_finale = llms_gagnants[0].copy()
+            rec_finale["qualite_recommandee"] = int(sum(qualites) / len(qualites))
+            rec_finale["justification"]       = justification_finale
+            rec_finale["llm_source"]          = f"vote_majoritaire_{nb_votes}_sur_3"
+            rec_finale["statut"]              = "succes"
+            return rec_finale
 
         return self._recommandation_par_defaut(rapport_agent1, "defaut")
 
@@ -311,7 +326,7 @@ REPONDS UNIQUEMENT EN JSON valide :
             "format_recommande"       : format_rec,
             "qualite_recommandee"     : qualite,
             "taux_compression_estime" : 60,
-            "justification"           : f"Defaut ({source})",
+            "justification"           : f"Defaut ({source}) - Erreur: {erreur}"[:200],
             "llm_source"              : source,
             "statut"                  : "defaut"
         }
