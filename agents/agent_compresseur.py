@@ -54,6 +54,60 @@ class AgentCompresseur:
         os.makedirs(dossier_sortie, exist_ok=True)
 
         image_source = Image.open(chemin_image)
+        
+        # ── Bypass si meme format ────────────────────────────
+        format_rec  = str(recommandation.get("format_recommande", "JPEG")).upper()
+        if format_rec == "JPG":
+            format_rec = "JPEG"
+            
+        format_original = image_source.format.upper() if getattr(image_source, "format", None) else os.path.splitext(chemin_image)[1].upper().replace(".", "")
+        if format_original == "JPG":
+            format_original = "JPEG"
+            
+        taille_originale_kb = os.path.getsize(chemin_image) / 1024
+        nom_base            = os.path.splitext(os.path.basename(chemin_image))[0]
+        qualite_rec         = recommandation.get("qualite_recommandee", 85)
+        
+        if format_original == format_rec:
+            import shutil
+            print(f"  Format original {format_original} identique a celui recommande. Bypass complet sans compression.")
+            ext_orig = os.path.splitext(chemin_image)[1]
+            nom_sortie = f"{nom_base}_original_identique{ext_orig}"
+            chemin_sortie = os.path.join(dossier_sortie, nom_sortie)
+            
+            shutil.copy2(chemin_image, chemin_sortie)
+            
+            largeur_orig, hauteur_orig = image_source.size
+            
+            resultat_identique = {
+                "label"               : "recommande",
+                "format"              : format_original,
+                "qualite"             : 100,
+                "chemin_fichier"      : chemin_sortie,
+                "taille_originale_kb" : round(taille_originale_kb, 2),
+                "taille_compresse_kb" : round(taille_originale_kb, 2),
+                "taux_compression_pct": 0.0,
+                "ratio_compression"   : 1.0,
+                "statut"              : "succes",
+                "choix_source"        : "original_identique"
+            }
+            
+            rapport = {
+                "agent"                : self.nom,
+                "date_compression"     : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "image_originale"      : chemin_image,
+                "taille_originale_kb"  : round(taille_originale_kb, 2),
+                "dimension_originale"  : f"{largeur_orig}x{hauteur_orig}",
+                "dimension_sortie"     : f"{largeur_orig}x{hauteur_orig}",
+                "format_recommande"    : format_rec,
+                "qualite_recommandee"  : 100,
+                "compressions"         : [resultat_identique],
+                "_toutes_compressions" : [resultat_identique],
+                "meilleure_compression": resultat_identique,
+                "statut"               : "succes"
+            }
+            return rapport
+
         image_png = image_source.copy()
 
         # Conversion RGB si necessaire pour JPG, WEBP, etc.
@@ -115,11 +169,6 @@ class AgentCompresseur:
                 print(f"  Redim cible : {largeur_orig}x{hauteur_orig} "
                       f"→ {target_w}x{target_h} (recadrage centre)")
 
-        taille_originale_kb = os.path.getsize(chemin_image) / 1024
-        nom_base            = os.path.splitext(os.path.basename(chemin_image))[0]
-
-        format_rec  = str(recommandation.get("format_recommande", "JPEG")).upper()
-        qualite_rec = recommandation.get("qualite_recommandee", 85)
         progressive = recommandation.get("parametres_avances", {}).get("progressive", True)
 
         resultats_compression = []
@@ -210,25 +259,6 @@ class AgentCompresseur:
         elif not fast_mode and not AVIF_DISPONIBLE:
             print("  AVIF non disponible - pillow-avif non installe")
 
-        # ── Fallback si taux negatif ─────────────────────────
-        import shutil
-        for res in resultats_compression:
-            if res.get("statut") == "succes" and res.get("taux_compression_pct", 0) < 0:
-                print(f"  [Fallback] Taux negatif ({res.get('taux_compression_pct')}%) pour {res.get('format')}. Copie de l'original.")
-                try:
-                    if os.path.exists(res["chemin_fichier"]):
-                        os.remove(res["chemin_fichier"])
-                    ext_orig = os.path.splitext(chemin_image)[1]
-                    nouveau_chemin = os.path.splitext(res["chemin_fichier"])[0] + "_fallback" + ext_orig
-                    shutil.copy2(chemin_image, nouveau_chemin)
-                    
-                    res["format"]               = f"ORIGINAL ({res.get('format')} annule)"
-                    res["chemin_fichier"]       = nouveau_chemin
-                    res["taille_compresse_kb"]  = res["taille_originale_kb"]
-                    res["taux_compression_pct"] = 0.0
-                    res["ratio_compression"]    = 1.0
-                except Exception as e:
-                    print(f"  Erreur lors du fallback: {e}")
 
         # ── Choisir le meilleur résultat ─────────────────────
         succes   = [c for c in resultats_compression if c.get("statut") == "succes"]
