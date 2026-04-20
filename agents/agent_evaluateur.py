@@ -148,16 +148,15 @@ class AgentEvaluateur:
         if not evaluations:
             return None
 
-        # Exclure les compressions avec taux nul (PNG sans perte souvent 0)
-        succes = [e for e in evaluations if e.get("taux_compression_pct", 0) != 0]
+        # Exclure les compressions avec taux strictement négatif ou nul, SAUF si c'est la recommandation
+        succes = [e for e in evaluations if e.get("taux_compression_pct", 0) > 0 or e.get("label") == "recommande"]
         if not succes:
             return evaluations[0] if evaluations else None
 
         # Priorite au format LLM avec label "recommande"
         if format_recommande:
             for e in succes:
-                if (e.get("format") == format_recommande and
-                        e.get("label") == "recommande"):
+                if e.get("label") == "recommande":
                     e["choix_source"] = "llm_recommande"
                     return e
 
@@ -175,7 +174,7 @@ class AgentEvaluateur:
         if not evaluations:
             return None
 
-        succes = [e for e in evaluations if e.get("taux_compression_pct", 0) != 0]
+        succes = [e for e in evaluations if e.get("taux_compression_pct", 0) > 0]
         if not succes:
             return evaluations[0]
 
