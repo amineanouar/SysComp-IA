@@ -583,30 +583,41 @@ if st.session_state["resultats_prets"]:
                     ax.set_ylim(max(0, min(vals) - 5), min(105, max(vals) + 10))
                 else: 
                     # Taux de compression
-                    ax.set_ylim(0, max(vals) + 15 if vals else 100)
+                    min_val = min(vals) if vals else 0
+                    y_min = min_val - 15 if min_val < 0 else 0
+                    y_max = max(vals) + 15 if vals else 100
+                    ax.set_ylim(y_min, y_max)
 
                 for bar, val in zip(bars, vals):
                     y_min, y_max = ax.get_ylim()
                     y_range = y_max - y_min
-                    is_clipped = bar.get_height() >= y_max - (0.02 * y_range)
+                    h = bar.get_height()
                     
-                    if is_clipped:
-                        # Si la barre dépasse le plafond, on met le texte juste en dessous
-                        y_pos = y_max - 0.02 * y_range
-                        va = 'top'
+                    if h >= 0:
+                        is_clipped = h >= y_max - (0.02 * y_range)
+                        if is_clipped:
+                            y_pos = y_max - 0.02 * y_range
+                            va = 'top'
+                        else:
+                            y_pos = h + 0.02 * y_range
+                            va = 'bottom'
                     else:
-                        # Sinon au-dessus de la barre
-                        y_pos = bar.get_height() + 0.02 * y_range
-                        va = 'bottom'
+                        is_clipped = h <= y_min + (0.02 * y_range)
+                        if is_clipped:
+                            y_pos = y_min + 0.02 * y_range
+                            va = 'bottom'
+                        else:
+                            y_pos = h - 0.02 * y_range
+                            va = 'top'
                         
                     # Le SSIM nécessite 3 décimales pour être précis, les autres 1 seule
                     texte_val = f"{val:.3f}" if "SSIM" in title else f"{val:.1f}"
                     ax.text(bar.get_x() + bar.get_width()/2, y_pos,
                             texte_val, ha='center', va=va, fontsize=9, fontweight='bold', color='black')
-            plt.suptitle("Comparaison des compressions (Échelles Zoomées)", fontsize=13, fontweight='bold')
-            plt.tight_layout()
-            # Ajuster le haut pour s'assurer que le main title ne chevauche pas
-            plt.subplots_adjust(top=0.82)
+            plt.suptitle("Comparaison des compressions", fontsize=13, fontweight='bold')
+            plt.tight_layout(w_pad=2.0)
+            # Ajuster le haut pour s'assurer que le main title ne chevauche pas et espacer les graphes
+            plt.subplots_adjust(top=0.82, wspace=0.35)
             st.pyplot(fig)
 
     st.divider()
