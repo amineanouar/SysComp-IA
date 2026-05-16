@@ -30,7 +30,7 @@ st.set_page_config(
 )
 
 API_URL     = "http://localhost:5000"
-WEBHOOK_N8N = "https://n8n.ismailslab.com/webhook/compression"
+WEBHOOK_N8N = "https://aminelab.app.n8n.cloud/webhook/compression"
 TIMEOUT     = 300
 MAX_PIXELS  = 4000 * 4000
 MODE        = "flask"
@@ -235,9 +235,13 @@ if fichier_upload is not None:
                 tmp.write(fichier_upload.getvalue())
                 chemin_tmp = tmp.name
 
-            img_check = Image.open(chemin_tmp)
+            img_check_original = Image.open(chemin_tmp)
+            original_format = img_check_original.format or fichier_upload.name.split('.')[-1].upper()
+            if original_format == "JPG": original_format = "JPEG"
             from PIL import ImageOps
-            img_check = Image.open(chemin_tmp).convert("RGB")
+            
+            resized = False
+            img_check = img_check_original.copy()
 
             # Redimensionnement 4K si trop grande
             if img_check.width * img_check.height > MAX_PIXELS:
@@ -246,6 +250,7 @@ if fichier_upload is not None:
                 new_h     = int(img_check.height * ratio)
                 img_check = img_check.resize((new_w, new_h), Image.LANCZOS)
                 st.info(f"📐 Redimensionnée 4K : {new_w}x{new_h} px")
+                resized = True
 
             # Redimensionnement à dimension cible si demandé
             if target_dim is not None and img_check.size != target_dim:
@@ -256,9 +261,17 @@ if fichier_upload is not None:
                     centering = (0.5, 0.5)
                 )
                 st.info(f"📐 Redimensionnée → {target_dim[0]}x{target_dim[1]} px")
+                resized = True
 
-            img_check.save(chemin_tmp, "JPEG", quality=95)
+            if resized:
+                if original_format in ["PNG", "WEBP"]:
+                    img_check.save(chemin_tmp, original_format)
+                else:
+                    img_check = img_check.convert("RGB")
+                    img_check.save(chemin_tmp, "JPEG", quality=95)
+            
             img_check.close()
+            img_check_original.close()
 
             # ============================================================
             # MODE N8N
@@ -267,7 +280,7 @@ if fichier_upload is not None:
                 with st.spinner("🔄 Pipeline n8n en cours — 5 agents en exécution..."):
                     r_n8n = requests.post(
                         WEBHOOK_N8N,
-                        json={"chemin_image": chemin_tmp, "categorie": categorie},
+                        json={"chemin_image": chemin_tmp.replace("\\", "/"), "categorie": categorie},
                         timeout=TIMEOUT
                     )
 
