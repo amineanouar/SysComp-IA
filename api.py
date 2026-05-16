@@ -170,16 +170,18 @@ def health():
 @app.route("/analyser", methods=["POST"])
 def analyser():
     try:
-        data         = request.json
+        data         = request.json if request.is_json else request.form.to_dict()
+        if data is None:
+            data = {}
         chemin_image = data.get("chemin_image", "")
         if not chemin_image:
-            return jsonify({"statut": "erreur", "message": "chemin_image manquant"}), 400
+            return jsonify({"statut": "erreur", "message": "chemin_image manquant", "raw_data": str(request.data)}), 200
         if not os.path.exists(chemin_image):
-            return jsonify({"statut": "erreur", "message": f"Image non trouvee"}), 404
+            return jsonify({"statut": "erreur", "message": f"Image non trouvee : {repr(chemin_image)}"}), 200
         rapport = agent1.analyser(chemin_image)
         return jsonify(rapport), 200
     except Exception as e:
-        return jsonify({"statut": "erreur", "message": str(e)}), 500
+        return jsonify({"statut": "erreur", "message": str(e)}), 200
 
 
 @app.route("/classifier", methods=["POST"])
